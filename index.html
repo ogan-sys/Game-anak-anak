@@ -2,13 +2,15 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Game Belajar Jumlah</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       background: #cceeff;
       font-family: sans-serif;
+      height: 100%;
       overflow: hidden;
     }
     #game {
@@ -22,7 +24,7 @@
       width: 50px;
       height: 50px;
       background: #ff6600;
-      bottom: 50px;
+      bottom: 100px;
       left: 50px;
     }
     .number {
@@ -43,7 +45,7 @@
       width: 60px;
       height: 100px;
       background: brown;
-      bottom: 50px;
+      bottom: 100px;
     }
     #questionBox {
       position: absolute;
@@ -60,40 +62,56 @@
       font-size: 20px;
     }
 
-    /* Tombol layar sentuh */
     #controls {
       position: absolute;
-      bottom: 10px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 30px;
+      gap: 40px;
       z-index: 5;
     }
     .btn-control {
       padding: 20px 30px;
-      font-size: 24px;
-      background: #444;
+      font-size: 28px;
+      background: #333;
       color: white;
       border: none;
-      border-radius: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    @media (orientation: portrait) {
+      body::before {
+        content: "Silakan putar HP ke posisi miring (landscape) untuk bermain.";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        text-align: center;
+        background: white;
+        padding: 20px;
+        z-index: 99;
+      }
+      #game {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
   <div id="game">
     <div class="player" id="player"></div>
-    <div class="number" id="num1" style="left: 300px; bottom: 50px;">4</div>
-    <div class="number" id="num2" style="left: 600px; bottom: 50px;">6</div>
+    <div class="number" id="num1" style="left: 300px; bottom: 100px;">4</div>
+    <div class="number" id="num2" style="left: 600px; bottom: 100px;">6</div>
     <div class="door" id="door" style="left: 900px;"></div>
     <div id="questionBox">
       <p id="questionText">Berapa hasil dari ?</p>
       <input type="number" id="answerInput" />
       <button onclick="checkAnswer()">Jawab</button>
     </div>
-
-    <!-- Tombol kontrol -->
     <div id="controls">
       <button class="btn-control" onclick="moveLeft()">⬅️</button>
       <button class="btn-control" onclick="moveRight()">➡️</button>
@@ -124,7 +142,6 @@
       checkCollision();
     }
 
-    // Keyboard juga tetap aktif (buat laptop)
     document.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") moveRight();
       if (e.key === "ArrowLeft") moveLeft();
@@ -165,9 +182,4 @@
         door.style.display = "none";
         questionBox.innerHTML = "<strong>Benar! Pintu terbuka!</strong>";
       } else {
-        questionBox.innerHTML += "<p style='color:red;'>Salah, coba lagi!</p>";
-      }
-    }
-  </script>
-</body>
-</html>
+        questionBox.innerHTML += "<p style='color:red;'>S
