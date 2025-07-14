@@ -1,191 +1,94 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Game Belajar Jumlah</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Game Anak Scroll</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background: #cceeff;
-      font-family: sans-serif;
       height: 100%;
       overflow: hidden;
+      background: #eef;
     }
-    #game {
+    #world {
+      width: 2000px; /* panjang dunia */
+      height: 100vh;
       position: relative;
+      background: linear-gradient(#cceeff, #88ccaa);
+    }
+    #viewport {
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(#cceeff, #88ccaa);
+      overflow: hidden;
+      position: relative;
     }
     .player {
       position: absolute;
       width: 50px;
-      height: 50px;
-      background: #ff6600;
-      bottom: 100px;
+      height: 70px;
+      background: url('https://i.imgur.com/8QfVZST.png') no-repeat center/contain; /* anak kecil */
+      bottom: 50px;
       left: 50px;
     }
-    .number {
+    .ground {
       position: absolute;
-      width: 40px;
-      height: 40px;
-      background: yellow;
-      color: black;
-      font-size: 24px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-    }
-    .door {
-      position: absolute;
-      width: 60px;
-      height: 100px;
-      background: brown;
-      bottom: 100px;
-    }
-    #questionBox {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 20px;
-      border: 2px solid black;
-      display: none;
-      z-index: 10;
-    }
-    #questionBox input {
-      font-size: 20px;
-    }
-
-    @media (orientation: portrait) {
-      body::before {
-        content: "Putar HP ke posisi miring (landscape) untuk bermain.";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 100%;
-        transform: translate(-50%, -50%);
-        font-size: 24px;
-        text-align: center;
-        background: white;
-        padding: 20px;
-        z-index: 99;
-      }
-      #game {
-        display: none;
-      }
+      height: 10px;
+      background: #444;
+      width: 100%;
+      bottom: 50px;
     }
   </style>
 </head>
 <body>
-  <div id="game">
-    <div class="player" id="player"></div>
-    <div class="number" id="num1" style="left: 300px; bottom: 100px;">4</div>
-    <div class="number" id="num2" style="left: 600px; bottom: 100px;">6</div>
-    <div class="door" id="door" style="left: 900px;"></div>
-    <div id="questionBox">
-      <p id="questionText">Berapa hasil dari ?</p>
-      <input type="number" id="answerInput" />
-      <button onclick="checkAnswer()">Jawab</button>
+  <div id="viewport">
+    <div id="world">
+      <div class="ground"></div>
+      <div class="player" id="player"></div>
     </div>
   </div>
 
   <script>
     const player = document.getElementById("player");
-    const num1 = document.getElementById("num1");
-    const num2 = document.getElementById("num2");
-    const door = document.getElementById("door");
-    const questionBox = document.getElementById("questionBox");
-    const questionText = document.getElementById("questionText");
-    const answerInput = document.getElementById("answerInput");
+    const world = document.getElementById("world");
+    const viewport = document.getElementById("viewport");
 
-    let position = 50;
-    let collected = [];
+    let playerX = 50;
+    const speed = 10;
+    const screenCenter = window.innerWidth / 2;
 
-    function moveRight() {
-      position += 10;
-      player.style.left = position + "px";
-      checkCollision();
-    }
-
-    function moveLeft() {
-      position -= 10;
-      if (position < 0) position = 0;
-      player.style.left = position + "px";
-      checkCollision();
-    }
-
-    function checkCollision() {
-      const playerRect = player.getBoundingClientRect();
-
-      [num1, num2].forEach((num) => {
-        if (!num.dataset.collected && num.style.display !== "none") {
-          const numRect = num.getBoundingClientRect();
-          if (
-            playerRect.left < numRect.right &&
-            playerRect.right > numRect.left
-          ) {
-            collected.push(parseInt(num.textContent));
-            num.style.display = "none";
-            num.dataset.collected = "true";
-          }
-        }
-      });
-
-      if (collected.length === 2) {
-        showQuestion();
-      }
-    }
-
-    function showQuestion() {
-      questionBox.style.display = "block";
-      questionText.textContent = `Berapa hasil dari ${collected[0]} + ${collected[1]}?`;
-      answerInput.focus();
-    }
-
-    function checkAnswer() {
-      const userAnswer = parseInt(answerInput.value);
-      const correct = collected[0] + collected[1];
-      if (userAnswer === correct) {
-        door.style.display = "none";
-        questionBox.innerHTML = "<strong>Benar! Pintu terbuka!</strong>";
-      } else {
-        questionBox.innerHTML += "<p style='color:red;'>Salah, coba lagi!</p>";
-      }
-    }
-
-    // Klik kanan/kiri layar untuk gerak
+    // Pindah kanan/kiri pakai tap layar
     document.addEventListener("click", (e) => {
-      const screenMiddle = window.innerWidth / 2;
-      if (e.clientX > screenMiddle) {
+      if (e.clientX > screenCenter) {
         moveRight();
       } else {
         moveLeft();
       }
     });
 
-    // Support keyboard juga
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") moveRight();
-      if (e.key === "ArrowLeft") moveLeft();
-    });
+    function moveRight() {
+      playerX += speed;
+      updatePosition();
+    }
 
-    // Fullscreen saat disentuh
-    document.addEventListener("click", () => {
-      const gameElem = document.documentElement;
-      if (gameElem.requestFullscreen) {
-        gameElem.requestFullscreen();
-      } else if (gameElem.webkitRequestFullscreen) {
-        gameElem.webkitRequestFullscreen();
-      } else if (gameElem.msRequestFullscreen) {
-        gameElem.msRequestFullscreen();
+    function moveLeft() {
+      playerX -= speed;
+      if (playerX < 0) playerX = 0;
+      updatePosition();
+    }
+
+    function updatePosition() {
+      player.style.left = playerX + "px";
+
+      // Kamera ngikutin pemain jika lewat tengah layar
+      let scrollX = playerX - window.innerWidth / 2 + 25;
+      if (scrollX < 0) scrollX = 0;
+      if (scrollX > world.offsetWidth - window.innerWidth) {
+        scrollX = world.offsetWidth - window.innerWidth;
       }
-    }, { once: true });
+      viewport.scrollLeft = scrollX;
+    }
   </script>
 </body>
 </html>
