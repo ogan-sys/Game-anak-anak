@@ -24,16 +24,17 @@
       position: absolute;
       width: 3000px; /* panjang dunia */
       height: 100vh;
-      background: linear-gradient(#cceeff, #88ccaa);
+      background: url('https://i.ibb.co/JFtM3XP/desa.jpg') repeat-x center center;
+      background-size: cover;
     }
 
     .player {
       position: absolute;
       width: 60px;
-      height: 60px;
-      background-color: #ff66cc; /* karakter anak-anak */
-      border-radius: 20%;
-      bottom: 50px;
+      height: 80px;
+      background: url('https://i.ibb.co/ZfYdmR1/anak.png') no-repeat center center;
+      background-size: contain;
+      bottom: 60px;
       left: 50px;
     }
 
@@ -45,9 +46,45 @@
       bottom: 50px;
     }
 
+    .number {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: yellow;
+      border-radius: 50%;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 40px;
+      bottom: 90px;
+    }
+
+    .door {
+      position: absolute;
+      width: 60px;
+      height: 100px;
+      background: brown;
+      bottom: 50px;
+    }
+
+    #questionBox {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 20px;
+      border: 2px solid black;
+      display: none;
+      z-index: 10;
+    }
+    #questionBox input {
+      font-size: 20px;
+    }
+
     @media (orientation: portrait) {
       body::before {
-        content: \"Putar HP ke posisi landscape buat main.\";
+        content: "Putar HP ke posisi landscape buat main.";
         position: absolute;
         top: 50%;
         left: 50%;
@@ -65,10 +102,23 @@
   </style>
 </head>
 <body>
+  <audio id="yaySound" src="https://www.soundjay.com/human/kids-cheering-01.mp3" preload="auto"></audio>
+  <div id="questionBox">
+    <p id="questionText"></p>
+    <input type="number" id="answerInput" />
+    <button onclick="checkAnswer()">Jawab</button>
+  </div>
   <div id="viewport">
     <div id="world">
       <div class="ground"></div>
       <div class="player" id="player"></div>
+      <div class="number" style="left: 400px">2</div>
+      <div class="number" style="left: 800px">4</div>
+      <div class="door" id="door1" style="left: 1000px"></div>
+      <div class="number" style="left: 1400px">7</div>
+      <div class="number" style="left: 1800px">1</div>
+      <div class="door" id="door2" style="left: 2000px"></div>
+      <div class="number" style="left: 2400px">9</div>
     </div>
   </div>
 
@@ -76,9 +126,17 @@
     const viewport = document.getElementById('viewport');
     const world = document.getElementById('world');
     const player = document.getElementById('player');
+    const yaySound = document.getElementById('yaySound');
+    const numbers = document.querySelectorAll('.number');
+    const questionBox = document.getElementById('questionBox');
+    const questionText = document.getElementById('questionText');
+    const answerInput = document.getElementById('answerInput');
 
     let playerX = 50;
     const speed = 10;
+    let collected = [];
+    let currentDoor = null;
+    let expectedSum = null;
 
     function moveLeft() {
       playerX -= speed;
@@ -94,12 +152,62 @@
 
     function update() {
       player.style.left = playerX + 'px';
-
       const scrollX = Math.max(0, playerX - window.innerWidth / 2 + 30);
       viewport.scrollLeft = scrollX;
+      checkCollision();
     }
 
-    // Gerak dengan klik kiri/kanan layar
+    function checkCollision() {
+      const playerRect = player.getBoundingClientRect();
+
+      numbers.forEach((num) => {
+        if (!num.dataset.collected) {
+          const numRect = num.getBoundingClientRect();
+          if (playerRect.left < numRect.right && playerRect.right > numRect.left) {
+            num.style.display = "none";
+            num.dataset.collected = true;
+            yaySound.play();
+            collected.push(parseInt(num.textContent));
+
+            if (collected.length === 2) {
+              expectedSum = collected[0] + collected[1];
+              showQuestion();
+            }
+          }
+        }
+      });
+
+      const doors = document.querySelectorAll('.door');
+      doors.forEach((door) => {
+        const doorRect = door.getBoundingClientRect();
+        if (door.style.display !== 'none' &&
+            playerRect.left < doorRect.right &&
+            playerRect.right > doorRect.left) {
+          currentDoor = door;
+        }
+      });
+    }
+
+    function showQuestion() {
+      questionBox.style.display = 'block';
+      questionText.textContent = `Berapa hasil dari ${collected[0]} + ${collected[1]}?`;
+      answerInput.value = '';
+      answerInput.focus();
+    }
+
+    function checkAnswer() {
+      const userAnswer = parseInt(answerInput.value);
+      if (userAnswer === expectedSum && currentDoor) {
+        currentDoor.style.display = 'none';
+        questionBox.style.display = 'none';
+        collected = [];
+        expectedSum = null;
+        currentDoor = null;
+      } else {
+        questionText.textContent += "\nJawaban salah, coba lagi.";
+      }
+    }
+
     document.addEventListener('click', (e) => {
       if (e.clientX < window.innerWidth / 2) {
         moveLeft();
@@ -108,13 +216,11 @@
       }
     });
 
-    // Keyboard juga masih bisa
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') moveRight();
       if (e.key === 'ArrowLeft') moveLeft();
     });
 
-    // Fullscreen otomatis saat disentuh pertama kali
     document.addEventListener('click', () => {
       const elem = document.documentElement;
       if (elem.requestFullscreen) elem.requestFullscreen();
