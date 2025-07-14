@@ -12,32 +12,55 @@
       overflow: hidden;
       background: #eef;
     }
-    #world {
-      width: 2000px; /* panjang dunia */
-      height: 100vh;
-      position: relative;
-      background: linear-gradient(#cceeff, #88ccaa);
-    }
+
     #viewport {
+      position: relative;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      position: relative;
     }
+
+    #world {
+      position: absolute;
+      width: 3000px; /* panjang dunia */
+      height: 100vh;
+      background: linear-gradient(#cceeff, #88ccaa);
+    }
+
     .player {
       position: absolute;
-      width: 50px;
-      height: 70px;
-      background: url('https://i.imgur.com/8QfVZST.png') no-repeat center/contain; /* anak kecil */
+      width: 60px;
+      height: 60px;
+      background-color: #ff66cc; /* karakter anak-anak */
+      border-radius: 20%;
       bottom: 50px;
       left: 50px;
     }
+
     .ground {
       position: absolute;
       height: 10px;
       background: #444;
       width: 100%;
       bottom: 50px;
+    }
+
+    @media (orientation: portrait) {
+      body::before {
+        content: \"Putar HP ke posisi landscape buat main.\";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        text-align: center;
+        background: white;
+        padding: 20px;
+        z-index: 999;
+      }
+      #viewport {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -50,45 +73,54 @@
   </div>
 
   <script>
-    const player = document.getElementById("player");
-    const world = document.getElementById("world");
-    const viewport = document.getElementById("viewport");
+    const viewport = document.getElementById('viewport');
+    const world = document.getElementById('world');
+    const player = document.getElementById('player');
 
     let playerX = 50;
     const speed = 10;
-    const screenCenter = window.innerWidth / 2;
-
-    // Pindah kanan/kiri pakai tap layar
-    document.addEventListener("click", (e) => {
-      if (e.clientX > screenCenter) {
-        moveRight();
-      } else {
-        moveLeft();
-      }
-    });
-
-    function moveRight() {
-      playerX += speed;
-      updatePosition();
-    }
 
     function moveLeft() {
       playerX -= speed;
       if (playerX < 0) playerX = 0;
-      updatePosition();
+      update();
     }
 
-    function updatePosition() {
-      player.style.left = playerX + "px";
+    function moveRight() {
+      playerX += speed;
+      if (playerX > world.offsetWidth - 60) playerX = world.offsetWidth - 60;
+      update();
+    }
 
-      // Kamera ngikutin pemain jika lewat tengah layar
-      let scrollX = playerX - window.innerWidth / 2 + 25;
-      if (scrollX < 0) scrollX = 0;
-      if (scrollX > world.offsetWidth - window.innerWidth) {
-        scrollX = world.offsetWidth - window.innerWidth;
-      }
+    function update() {
+      player.style.left = playerX + 'px';
+
+      const scrollX = Math.max(0, playerX - window.innerWidth / 2 + 30);
       viewport.scrollLeft = scrollX;
     }
+
+    // Gerak dengan klik kiri/kanan layar
+    document.addEventListener('click', (e) => {
+      if (e.clientX < window.innerWidth / 2) {
+        moveLeft();
+      } else {
+        moveRight();
+      }
+    });
+
+    // Keyboard juga masih bisa
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') moveRight();
+      if (e.key === 'ArrowLeft') moveLeft();
+    });
+
+    // Fullscreen otomatis saat disentuh pertama kali
+    document.addEventListener('click', () => {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+      else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+    }, { once: true });
   </script>
 </body>
 </html>
