@@ -159,7 +159,7 @@
       }
     }
 
-    // Kontrol dengan klik sisi kiri/kanan layar
+    // Klik kanan/kiri layar untuk gerak
     document.addEventListener("click", (e) => {
       const screenMiddle = window.innerWidth / 2;
       if (e.clientX > screenMiddle) {
@@ -169,11 +169,23 @@
       }
     });
 
-    // Tambahan buat keyboard (laptop masih bisa)
+    // Support keyboard juga
     document.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") moveRight();
       if (e.key === "ArrowLeft") moveLeft();
     });
+
+    // Fullscreen saat disentuh
+    document.addEventListener("click", () => {
+      const gameElem = document.documentElement;
+      if (gameElem.requestFullscreen) {
+        gameElem.requestFullscreen();
+      } else if (gameElem.webkitRequestFullscreen) {
+        gameElem.webkitRequestFullscreen();
+      } else if (gameElem.msRequestFullscreen) {
+        gameElem.msRequestFullscreen();
+      }
+    }, { once: true });
   </script>
 </body>
 </html>
