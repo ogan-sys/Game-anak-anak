@@ -62,28 +62,9 @@
       font-size: 20px;
     }
 
-    #controls {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 40px;
-      z-index: 5;
-    }
-    .btn-control {
-      padding: 20px 30px;
-      font-size: 28px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-
     @media (orientation: portrait) {
       body::before {
-        content: "Silakan putar HP ke posisi miring (landscape) untuk bermain.";
+        content: "Putar HP ke posisi miring (landscape) untuk bermain.";
         position: absolute;
         top: 50%;
         left: 50%;
@@ -112,10 +93,6 @@
       <input type="number" id="answerInput" />
       <button onclick="checkAnswer()">Jawab</button>
     </div>
-    <div id="controls">
-      <button class="btn-control" onclick="moveLeft()">⬅️</button>
-      <button class="btn-control" onclick="moveRight()">➡️</button>
-    </div>
   </div>
 
   <script>
@@ -138,14 +115,10 @@
 
     function moveLeft() {
       position -= 10;
+      if (position < 0) position = 0;
       player.style.left = position + "px";
       checkCollision();
     }
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") moveRight();
-      if (e.key === "ArrowLeft") moveLeft();
-    });
 
     function checkCollision() {
       const playerRect = player.getBoundingClientRect();
@@ -182,4 +155,25 @@
         door.style.display = "none";
         questionBox.innerHTML = "<strong>Benar! Pintu terbuka!</strong>";
       } else {
-        questionBox.innerHTML += "<p style='color:red;'>S
+        questionBox.innerHTML += "<p style='color:red;'>Salah, coba lagi!</p>";
+      }
+    }
+
+    // Kontrol dengan klik sisi kiri/kanan layar
+    document.addEventListener("click", (e) => {
+      const screenMiddle = window.innerWidth / 2;
+      if (e.clientX > screenMiddle) {
+        moveRight();
+      } else {
+        moveLeft();
+      }
+    });
+
+    // Tambahan buat keyboard (laptop masih bisa)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") moveRight();
+      if (e.key === "ArrowLeft") moveLeft();
+    });
+  </script>
+</body>
+</html>
