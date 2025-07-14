@@ -54,9 +54,30 @@
       padding: 20px;
       border: 2px solid black;
       display: none;
+      z-index: 10;
     }
     #questionBox input {
       font-size: 20px;
+    }
+
+    /* Tombol layar sentuh */
+    #controls {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 30px;
+      z-index: 5;
+    }
+    .btn-control {
+      padding: 20px 30px;
+      font-size: 24px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -70,6 +91,12 @@
       <p id="questionText">Berapa hasil dari ?</p>
       <input type="number" id="answerInput" />
       <button onclick="checkAnswer()">Jawab</button>
+    </div>
+
+    <!-- Tombol kontrol -->
+    <div id="controls">
+      <button class="btn-control" onclick="moveLeft()">⬅️</button>
+      <button class="btn-control" onclick="moveRight()">➡️</button>
     </div>
   </div>
 
@@ -85,15 +112,22 @@
     let position = 50;
     let collected = [];
 
-    // Tombol gerak
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") {
-        position += 10;
-      } else if (e.key === "ArrowLeft") {
-        position -= 10;
-      }
+    function moveRight() {
+      position += 10;
       player.style.left = position + "px";
       checkCollision();
+    }
+
+    function moveLeft() {
+      position -= 10;
+      player.style.left = position + "px";
+      checkCollision();
+    }
+
+    // Keyboard juga tetap aktif (buat laptop)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") moveRight();
+      if (e.key === "ArrowLeft") moveLeft();
     });
 
     function checkCollision() {
